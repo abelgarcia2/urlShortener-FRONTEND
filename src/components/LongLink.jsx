@@ -1,28 +1,25 @@
 import { useState, useEffect } from 'react';
+import ShortLink from './ShortLink';
 function LongLink() {
 	const [link, setLink] = useState('');
 	const [res, setRes] = useState('');
 	const url = 'http://localhost:5000/shorten';
 
-	const getShortLink = async () => {
-		try {
-			const response = await fetch(url, {
-				method: 'POST',
-				body: { url: link },
-			});
-
-			console.log(response);
-			const data = await response.json();
-			setRes(data);
-			console.log(data);
-		} catch (error) {
-			console.log(error);
-		}
+	const handleClick = async () => {
+		const response = await fetch(url, {
+			method: 'POST',
+			body: JSON.stringify({ url: link }),
+			headers: {
+				'Content-Type': 'application/json',
+				'Access-Control-Allow-Origin': 'http://localhost:3000',
+			},
+		});
+		setRes(await response.json().then((e) => e.code));
 	};
 
-	useEffect(() => {
-		getShortLink();
-	}, []);
+	/* useEffect(() => {
+		handleClick();
+	}, []); */
 
 	const handleChange = (e) => {
 		setLink(e.target.value);
@@ -30,10 +27,9 @@ function LongLink() {
 
 	return (
 		<div>
-			<form onSubmit={getShortLink}>
-				<input type='text' onChange={handleChange} />
-				<button>Short link!</button>
-			</form>
+			<input type='text' onChange={handleChange} />
+			<button onClick={handleClick}>Short link!</button>
+			<ShortLink url={res} />
 		</div>
 	);
 }
